@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "952903228804",
+    "project_id": "mychatapp-96449",
+    "storage_bucket": "mychatapp-96449.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:952903228804:android:dbb229e85c3937527551d1",
+        "android_client_info": {
+          "package_name": "com.example.cricquiz"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5YRn4PbARWVfKuhCkNhWEDt3ZUig2DSY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:952903228804:android:badbdabd0c470f567551d1",
+        "android_client_info": {
+          "package_name": "com.example.mychatapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5YRn4PbARWVfKuhCkNhWEDt3ZUig2DSY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
