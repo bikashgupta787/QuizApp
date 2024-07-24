@@ -48,7 +48,6 @@ public class QuizListAdapter extends RecyclerView.Adapter<QuizListAdapter.QuizLi
         private ImageView quizImage;
         public QuizListViewHolder(@NonNull View itemView) {
             super(itemView);
-
             title = itemView.findViewById(R.id.quizTitleList);
             quizImage = itemView.findViewById(R.id.quizImageList);
         }

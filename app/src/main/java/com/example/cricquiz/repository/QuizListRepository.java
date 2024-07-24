@@ -22,7 +22,7 @@ public class QuizListRepository {
     }
 
 
-    private void getQuizData(){
+    public void getQuizData(){
         reference.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
