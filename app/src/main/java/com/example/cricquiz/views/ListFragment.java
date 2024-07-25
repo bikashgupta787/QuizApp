@@ -25,7 +25,7 @@ import com.example.cricquiz.viewmodel.QuizListViewModel;
 import java.util.List;
 
 
-public class ListFragment extends Fragment {
+public class ListFragment extends Fragment implements QuizListAdapter.OnItemClickListener {
     private RecyclerView  recyclerView;
     private ProgressBar progressBar;
     private NavController navController;
@@ -56,7 +56,7 @@ public class ListFragment extends Fragment {
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new QuizListAdapter();
+        adapter = new QuizListAdapter(this);
         recyclerView.setAdapter(adapter);
 
         viewModel.getQuizListLiveData().observe(getViewLifecycleOwner(), new Observer<List<QuizListModel>>() {
@@ -64,8 +64,17 @@ public class ListFragment extends Fragment {
             public void onChanged(List<QuizListModel> quizListModels) {
                 progressBar.setVisibility(View.GONE);
                 adapter.setQuizListModelList(quizListModels);
+                adapter.notifyDataSetChanged();
             }
         });
 
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        ListFragmentDirections.ActionListFragmentToDetailsFragment action =
+                ListFragmentDirections.actionListFragmentToDetailsFragment();
+        action.setPosition(position);
+        navController.navigate(action);
     }
 }

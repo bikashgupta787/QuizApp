@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -19,9 +20,16 @@ public class QuizListAdapter extends RecyclerView.Adapter<QuizListAdapter.QuizLi
 
     private List<QuizListModel> quizListModelList;
 
+    private OnItemClickListener onItemClickListener;
+
     public void setQuizListModelList(List<QuizListModel> quizListModelList) {
         this.quizListModelList = quizListModelList;
     }
+
+    public QuizListAdapter(OnItemClickListener onItemClickListener){
+        this.onItemClickListener = onItemClickListener;
+    }
+
 
     @NonNull
     @Override
@@ -39,17 +47,34 @@ public class QuizListAdapter extends RecyclerView.Adapter<QuizListAdapter.QuizLi
 
     @Override
     public int getItemCount() {
+        if (quizListModelList == null){
+            return 0;
+        }else {
         return quizListModelList.size();
     }
+    }
 
-    public class QuizListViewHolder extends RecyclerView.ViewHolder{
+    public class QuizListViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private TextView title;
         private ImageView quizImage;
+
+        private ConstraintLayout constraintLayout;
         public QuizListViewHolder(@NonNull View itemView) {
             super(itemView);
             title = itemView.findViewById(R.id.quizTitleList);
             quizImage = itemView.findViewById(R.id.quizImageList);
+            constraintLayout = itemView.findViewById(R.id.constraintLayout);
+            constraintLayout.setOnClickListener(this);
         }
+
+        @Override
+        public void onClick(View view) {
+            onItemClickListener.onItemClick(getAdapterPosition());
+        }
+    }
+
+    public interface OnItemClickListener{
+        void onItemClick(int position);
     }
 }
