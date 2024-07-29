@@ -20,7 +20,7 @@ import android.widget.ProgressBar;
 import com.example.cricquiz.Adapter.QuizListAdapter;
 import com.example.cricquiz.Model.QuizListModel;
 import com.example.cricquiz.R;
-import com.example.cricquiz.viewmodel.QuizListViewModel;
+import com.example.cricquiz.viewModel.QuizListViewModel;
 
 import java.util.List;
 

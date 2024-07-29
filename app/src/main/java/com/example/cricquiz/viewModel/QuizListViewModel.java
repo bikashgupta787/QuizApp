@@ -1,4 +1,4 @@
-package com.example.cricquiz.viewmodel;
+package com.example.cricquiz.viewModel;
 
 import android.util.Log;
 
