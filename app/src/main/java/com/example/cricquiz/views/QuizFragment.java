@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -11,6 +12,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import android.os.CountDownTimer;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +25,9 @@ import com.example.cricquiz.Model.QuestionModel;
 import com.example.cricquiz.Model.QuestionViewModel;
 import com.example.cricquiz.R;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 
 public class QuizFragment extends Fragment implements View.OnClickListener {
@@ -128,6 +132,7 @@ public class QuizFragment extends Fragment implements View.OnClickListener {
                 option2Btn.setText(questionModels.get(i-1).getOption_b());
                 option3Btn.setText(questionModels.get(i-1).getOption_c());
                 timer = questionModels.get(i-1).getTimer();
+                answer = questionModels.get(i-1).getAnswer();
             }
         });
         startTimer();
@@ -136,6 +141,7 @@ public class QuizFragment extends Fragment implements View.OnClickListener {
 
     private void startTimer() {
         timerCountTv.setText(String.valueOf(timer));
+        progressBar.setVisibility(View.VISIBLE);
         countDownTimer = new CountDownTimer(timer * 1000,1000) {
             @Override
             public void onTick(long l) {
@@ -193,12 +199,38 @@ public class QuizFragment extends Fragment implements View.OnClickListener {
     }
 
     private void resetOptions() {
+        ansFeedBackTv.setVisibility(View.INVISIBLE);
+        nextQueBtn.setVisibility(View.INVISIBLE);
+        nextQueBtn.setEnabled(false);
+        option1Btn.setBackground(ContextCompat.getDrawable(getContext(),R.color.light_sky));
+        option2Btn.setBackground(ContextCompat.getDrawable(getContext(),R.color.light_sky));
+        option3Btn.setBackground(ContextCompat.getDrawable(getContext(),R.color.light_sky));
     }
 
     private void submitResults() {
+        HashMap<String, Object> resultMap = new HashMap<>();
+        resultMap.put("correct",correctAnswer);
+        resultMap.put("wrong",wrongAnswer);
+        resultMap.put("notAnswered",notAnswerd);
+
+        viewModel.addResults(resultMap);
+        navController.navigate(R.id.action_quizFragment_to_resultFragment);
     }
 
     private void verifyAnswer(Button button) {
-
+        if (canAnswer){
+            if (answer.equals(button.getText())){
+                button.setBackground(ContextCompat.getDrawable(getContext(),R.color.green));
+                correctAnswer++;
+                ansFeedBackTv.setText("Correct Answer");
+            }else {
+                button.setBackground(ContextCompat.getDrawable(getContext(),R.color.red));
+                wrongAnswer++;
+                ansFeedBackTv.setText("Wrong Answer\nCorrect Answer :" + answer);
+            }
+        }
+        canAnswer=false;
+        countDownTimer.cancel();
+        showNextBtn();
     }
 }

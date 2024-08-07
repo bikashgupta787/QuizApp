@@ -6,25 +6,46 @@ import androidx.lifecycle.MutableLiveData;
 import com.example.cricquiz.Model.QuestionModel;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class QuestionRepository {
 
     private FirebaseFirestore firebaseFirestore;
     private String quizId;
-
     private OnQuestionLoad onQuestionLoad;
+
+    private OnResultAdded onResultAdded;
+    private String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+    public void addResults(HashMap<String, Object> resultMap){
+        firebaseFirestore.collection("Quiz").document(quizId)
+                .collection("results").document(currentUserId)
+                .set(resultMap).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()){
+
+                        }else {
+
+                        }
+                    }
+                });
+    }
 
     public void setQuizId(String quizId) {
         this.quizId = quizId;
     }
 
-    public QuestionRepository(OnQuestionLoad onQuestionLoad){
+    public QuestionRepository(OnQuestionLoad onQuestionLoad, OnResultAdded onResultAdded){
         firebaseFirestore = FirebaseFirestore.getInstance();
         this.onQuestionLoad = onQuestionLoad;
+        this.onResultAdded = onResultAdded;
     }
 
     public void getQuestions(){
@@ -43,6 +64,11 @@ public class QuestionRepository {
 
     public interface OnQuestionLoad{
         void onLoad(List<QuestionModel> questionModels);
+        void onError(Exception e);
+    }
+
+    public interface OnResultAdded{
+        boolean onSubmit();
         void onError(Exception e);
     }
 }
