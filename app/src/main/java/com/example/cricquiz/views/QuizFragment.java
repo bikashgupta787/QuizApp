@@ -26,7 +26,7 @@ import com.example.cricquiz.R;
 import java.util.List;
 
 
-public class QuizFragment extends Fragment {
+public class QuizFragment extends Fragment implements View.OnClickListener {
 
   private QuestionViewModel viewModel;
 
@@ -47,6 +47,7 @@ public class QuizFragment extends Fragment {
     private int correctAnswer = 0;
     private int wrongAnswer = 0;
     private String answer = "";
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -77,9 +78,48 @@ public class QuizFragment extends Fragment {
         timerCountTv = view.findViewById(R.id.countTimeQuiz);
         questionNumberTv = view.findViewById(R.id.quizQuestionsCount);
         progressBar = view.findViewById(R.id.quizCoutProgressBar);
+
+        quizId  =QuizFragmentArgs.fromBundle(getArguments()).getQuizId();
+        totalQuestions = QuizFragmentArgs.fromBundle(getArguments()).getTotalQuestionsCount();
+        viewModel.setQuizId(quizId);
+
+        option1Btn.setOnClickListener(this);
+        option2Btn.setOnClickListener(this);
+        option3Btn.setOnClickListener(this);
+        nextQueBtn.setOnClickListener(this);
+
+        closeQuizBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                navController.navigate(R.id.action_quizFragment_to_listFragment);
+            }
+        });
+
+        loadData();
+    }
+
+    private void loadData() {
+        enableOptions();
+        loadQuestions(1);
+    }
+
+    private void enableOptions() {
+        option1Btn.setVisibility(View.VISIBLE);
+        option2Btn.setVisibility(View.VISIBLE);
+        option3Btn.setVisibility(View.VISIBLE);
+
+        option1Btn.setEnabled(true);
+        option2Btn.setEnabled(true);
+        option3Btn.setEnabled(true);
+
+        ansFeedBackTv.setVisibility(View.INVISIBLE);
+        nextQueBtn.setVisibility(View.INVISIBLE);
+
     }
 
     private void loadQuestions(int i ){
+
+        currentQueNo = i;
         viewModel.getQuestionMutableLiveData().observe(getViewLifecycleOwner(), new Observer<List<QuestionModel>>() {
             @Override
             public void onChanged(List<QuestionModel> questionModels) {
@@ -87,7 +127,78 @@ public class QuizFragment extends Fragment {
                 option1Btn.setText(questionModels.get(i-1).getOption_a());
                 option2Btn.setText(questionModels.get(i-1).getOption_b());
                 option3Btn.setText(questionModels.get(i-1).getOption_c());
+                timer = questionModels.get(i-1).getTimer();
             }
         });
+        startTimer();
+        canAnswer = true;
+    }
+
+    private void startTimer() {
+        timerCountTv.setText(String.valueOf(timer));
+        countDownTimer = new CountDownTimer(timer * 1000,1000) {
+            @Override
+            public void onTick(long l) {
+                //update time
+                timerCountTv.setText(l / 1000 + "");
+
+                Long percent = l/(timer*10);
+                progressBar.setProgress(percent.intValue());
+            }
+
+            @Override
+            public void onFinish() {
+                canAnswer = false;
+                ansFeedBackTv.setText("Times up!!No Answer Selected");
+                notAnswerd ++;
+                showNextBtn();
+            }
+        }.start();
+    }
+
+    private void showNextBtn() {
+        if (currentQueNo == totalQuestions){
+            nextQueBtn.setText("Submit");
+            nextQueBtn.setVisibility(View.VISIBLE);
+            nextQueBtn.setEnabled(true);
+        } else {
+            nextQueBtn.setVisibility(View.VISIBLE);
+            nextQueBtn.setEnabled(true);
+            ansFeedBackTv.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()){
+            case R.id.option1Btn:
+                verifyAnswer(option1Btn);
+                break;
+            case R.id.option2Btn:
+                verifyAnswer(option2Btn);
+                break;
+            case R.id.option3Btn:
+                verifyAnswer(option3Btn);
+                break;
+            case R.id.nextQueBtn:
+                if (currentQueNo == totalQuestions){
+                    submitResults();
+                }else {
+                    currentQueNo ++;
+                    loadQuestions(currentQueNo);
+                    resetOptions();
+                }
+                break;
+        }
+    }
+
+    private void resetOptions() {
+    }
+
+    private void submitResults() {
+    }
+
+    private void verifyAnswer(Button button) {
+
     }
 }
