@@ -12,7 +12,6 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import android.os.CountDownTimer;
-import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +26,6 @@ import com.example.cricquiz.R;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
 
 public class QuizFragment extends Fragment implements View.OnClickListener {
@@ -38,7 +36,7 @@ public class QuizFragment extends Fragment implements View.OnClickListener {
 
 
     private ProgressBar progressBar;
-    private Button option1Btn , option2Btn , option3Btn , nextQueBtn;
+    private Button option1Button, option2Btn , option3Btn , nextQueBtn;
     private TextView questionTv , ansFeedBackTv , questionNumberTv , timerCountTv;
     private ImageView closeQuizBtn;
     private String quizId;
@@ -52,6 +50,11 @@ public class QuizFragment extends Fragment implements View.OnClickListener {
     private int wrongAnswer = 0;
     private String answer = "";
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        viewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getActivity().getApplication())).get(QuestionViewModel.class);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -61,19 +64,13 @@ public class QuizFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        viewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getActivity().getApplication())).get(QuestionViewModel.class);
-    }
-
-    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         navController = Navigation.findNavController(view);
 
         closeQuizBtn = view.findViewById(R.id.imageView3);
-        option1Btn = view.findViewById(R.id.option1Btn);
+        option1Button = view.findViewById(R.id.option1Btn);
         option2Btn = view.findViewById(R.id.option2Btn);
         option3Btn = view.findViewById(R.id.option3Btn);
         nextQueBtn = view.findViewById(R.id.nextQueBtn);
@@ -86,8 +83,9 @@ public class QuizFragment extends Fragment implements View.OnClickListener {
         quizId  =QuizFragmentArgs.fromBundle(getArguments()).getQuizId();
         totalQuestions = QuizFragmentArgs.fromBundle(getArguments()).getTotalQuestionsCount();
         viewModel.setQuizId(quizId);
+        viewModel.getQuestions();
 
-        option1Btn.setOnClickListener(this);
+        option1Button.setOnClickListener(this);
         option2Btn.setOnClickListener(this);
         option3Btn.setOnClickListener(this);
         nextQueBtn.setOnClickListener(this);
@@ -108,11 +106,11 @@ public class QuizFragment extends Fragment implements View.OnClickListener {
     }
 
     private void enableOptions() {
-        option1Btn.setVisibility(View.VISIBLE);
+        option1Button.setVisibility(View.VISIBLE);
         option2Btn.setVisibility(View.VISIBLE);
         option3Btn.setVisibility(View.VISIBLE);
 
-        option1Btn.setEnabled(true);
+        option1Button.setEnabled(true);
         option2Btn.setEnabled(true);
         option3Btn.setEnabled(true);
 
@@ -127,15 +125,17 @@ public class QuizFragment extends Fragment implements View.OnClickListener {
         viewModel.getQuestionMutableLiveData().observe(getViewLifecycleOwner(), new Observer<List<QuestionModel>>() {
             @Override
             public void onChanged(List<QuestionModel> questionModels) {
-                questionTv.setText(questionModels.get(i-1).getQuestion());
-                option1Btn.setText(questionModels.get(i-1).getOption_a());
+                questionTv.setText(String.valueOf(currentQueNo)+") "+questionModels.get(i-1).getQuestion());
+                option1Button.setText(questionModels.get(i-1).getOption_a());
                 option2Btn.setText(questionModels.get(i-1).getOption_b());
                 option3Btn.setText(questionModels.get(i-1).getOption_c());
                 timer = questionModels.get(i-1).getTimer();
                 answer = questionModels.get(i-1).getAnswer();
+                //todo set current que no, to que number tv
+                questionNumberTv.setText(String.valueOf(currentQueNo));
+                startTimer();
             }
         });
-        startTimer();
         canAnswer = true;
     }
 
@@ -174,35 +174,56 @@ public class QuizFragment extends Fragment implements View.OnClickListener {
         }
     }
 
+
+//    @Override
+//    public void onClick(View view) {
+//        switch (view.getId()){
+//            case R.id.option1Btn:
+//                verifyAnswer(option1Button);
+//                break;
+//            case R.id.option2Btn:
+//                verifyAnswer(option2Btn);
+//                break;
+//            case R.id.option3Btn:
+//                verifyAnswer(option3Btn);
+//                break;
+//            case R.id.nextQueBtn:
+//                if (currentQueNo == totalQuestions){
+//                    submitResults();
+//                }else {
+//                    currentQueNo ++;
+//                    loadQuestions(currentQueNo);
+//                    resetOptions();
+//                }
+//                break;
+//        }
+//    }
+
     @Override
     public void onClick(View view) {
-        switch (view.getId()){
-            case R.id.option1Btn:
-                verifyAnswer(option1Btn);
-                break;
-            case R.id.option2Btn:
-                verifyAnswer(option2Btn);
-                break;
-            case R.id.option3Btn:
-                verifyAnswer(option3Btn);
-                break;
-            case R.id.nextQueBtn:
-                if (currentQueNo == totalQuestions){
-                    submitResults();
-                }else {
-                    currentQueNo ++;
-                    loadQuestions(currentQueNo);
-                    resetOptions();
-                }
-                break;
+        if (view.getId() == R.id.option1Btn) {
+            verifyAnswer(option1Button);
+        } else if (view.getId() == R.id.option2Btn) {
+            verifyAnswer(option2Btn);
+        } else if (view.getId() == R.id.option3Btn) {
+            verifyAnswer(option3Btn);
+        } else if (view.getId() == R.id.nextQueBtn) {
+            if (currentQueNo == totalQuestions) {
+                submitResults();
+            } else {
+                currentQueNo++;
+                loadQuestions(currentQueNo);
+                resetOptions();
+            }
         }
     }
+
 
     private void resetOptions() {
         ansFeedBackTv.setVisibility(View.INVISIBLE);
         nextQueBtn.setVisibility(View.INVISIBLE);
         nextQueBtn.setEnabled(false);
-        option1Btn.setBackground(ContextCompat.getDrawable(getContext(),R.color.light_sky));
+        option1Button.setBackground(ContextCompat.getDrawable(getContext(),R.color.light_sky));
         option2Btn.setBackground(ContextCompat.getDrawable(getContext(),R.color.light_sky));
         option3Btn.setBackground(ContextCompat.getDrawable(getContext(),R.color.light_sky));
     }
@@ -214,7 +235,10 @@ public class QuizFragment extends Fragment implements View.OnClickListener {
         resultMap.put("notAnswered",notAnswerd);
 
         viewModel.addResults(resultMap);
-        navController.navigate(R.id.action_quizFragment_to_resultFragment);
+        QuizFragmentDirections.ActionQuizFragmentToResultFragment action =
+                QuizFragmentDirections.actionQuizFragmentToResultFragment();
+        action.setQuizId(quizId);
+        navController.navigate(action);
     }
 
     private void verifyAnswer(Button button) {
@@ -233,4 +257,5 @@ public class QuizFragment extends Fragment implements View.OnClickListener {
         countDownTimer.cancel();
         showNextBtn();
     }
+
 }
